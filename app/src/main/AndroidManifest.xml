@@ -19,6 +19,7 @@
             </intent-filter>
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <action android:name="android.intent.action.VIEW" />
                 <data android:scheme="file" />
                 <data android:scheme="content" />

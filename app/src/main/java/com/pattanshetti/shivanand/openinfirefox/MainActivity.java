@@ -1,10 +1,12 @@
 package com.pattanshetti.shivanand.openinfirefox;
 
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.os.*;
 import android.content.Intent;
 import android.util.Log;
 import android.os.Environment;
+import java.lang.reflect.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +33,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void openInFirefox(Intent intent){
+        if(Build.VERSION.SDK_INT>=24){
+            try{
+                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
+                m.invoke(null);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
         String URI = intent.getData().getPath().replace("/external_files/", "file://"+Environment.getExternalStorageDirectory().getPath()+"/");
+        Intent firefoxIntent = new Intent(intent.getAction());
+        firefoxIntent.setDataAndType(Uri.parse(URI), intent.getType());
+        // startActivity(Intent.createChooser(firefoxIntent, "Open file using:"));
+        firefoxIntent.setPackage("org.mozilla.firefox");
+        startActivity(firefoxIntent);
+        this.finish();
     }
 }

@@ -122,9 +122,13 @@ public class PathDecoder {
     }
 
     public String getPathFromDecodedString(String decodedString) {
-        String parsedPath = "";
+        String parsedPath = decodedString;
 
+        if(decodedString.contains("/root-path/")){
+            parsedPath = decodedString.replace("/root-path/", "/");
+        }
 
+        parsedPath = "file://" + parsedPath;
 
         return parsedPath;
     }

@@ -53,16 +53,19 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        Log.d("CUSTOM:PathforURI", intent.getData().getPath());
-        String URI = intent.getData().getPath();
-        URI = URI.substring(ordinalIndexOf(URI, "/", 2) + 1);
-        URI = "file://"/*+Environment.getExternalStorageDirectory().getPath()*/ + "/" + URI;
-        Log.d("CUSTOM:URI", URI);
+
+//        Log.d("CUSTOM:PathforURI", intent.getData().getPath());
+//        String URI = intent.getData().getPath();
+//        URI = URI.substring(ordinalIndexOf(URI, "/", 2) + 1);
+//        URI = "file://"/*+Environment.getExternalStorageDirectory().getPath()*/ + "/" + URI;
+//        Log.d("CUSTOM:URI", URI);
+
         Intent firefoxIntent = new Intent(intent.getAction());
-        firefoxIntent.setDataAndType(Uri.parse(URI), intent.getType());
+        // firefoxIntent.setDataAndType(Uri.parse(URI), intent.getType());
+        PathDecoder pathDecoder = new PathDecoder();
+        firefoxIntent.setDataAndType(Uri.parse(pathDecoder.getPathFromURI(intent.getData())), intent.getType());
         // startActivity(Intent.createChooser(firefoxIntent, "Open file using:"));
         firefoxIntent.setPackage("org.mozilla.firefox");
-
         startActivity(firefoxIntent);
         this.finish();
     }

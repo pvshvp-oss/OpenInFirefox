@@ -63,7 +63,9 @@ public class MainActivity extends AppCompatActivity {
         Intent firefoxIntent = new Intent(intent.getAction());
         // firefoxIntent.setDataAndType(Uri.parse(URI), intent.getType());
         PathDecoder pathDecoder = new PathDecoder();
+        Log.d("CUSTOM:PathforURI", intent.getData().getPath());
         firefoxIntent.setDataAndType(Uri.parse(pathDecoder.getPathFromURI(intent.getData())), intent.getType());
+        Log.d("CUSTOM:ParsedPath", pathDecoder.getPathFromURI(intent.getData()));
         // startActivity(Intent.createChooser(firefoxIntent, "Open file using:"));
         firefoxIntent.setPackage("org.mozilla.firefox");
         startActivity(firefoxIntent);

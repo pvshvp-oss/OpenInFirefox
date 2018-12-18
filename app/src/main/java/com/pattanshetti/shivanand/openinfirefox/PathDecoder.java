@@ -1,6 +1,7 @@
 package com.pattanshetti.shivanand.openinfirefox;
 
 import android.net.Uri;
+import android.os.Environment;
 
 public class PathDecoder {
     private String scheme;
@@ -126,6 +127,12 @@ public class PathDecoder {
 
         if(decodedString.contains("/root-path/")){
             parsedPath = decodedString.replace("/root-path/", "/");
+        } else if(decodedString.contains("/external_files/")){
+            parsedPath = decodedString.replace("/external_files/", Environment.getExternalStorageDirectory().getPath() + "/");
+        }
+
+        if(decodedString.indexOf("/file/") == 0) {
+            parsedPath = parsedPath.replace("/file/", "/");
         }
 
         parsedPath = "file://" + parsedPath;

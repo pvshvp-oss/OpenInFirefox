@@ -135,8 +135,8 @@ public class PathDecoder {
             parsedPath = decodedString.replaceFirst("/document/raw:/", "/");
         }
 
-        if(decodedString.indexOf("/file/") == 0) {
-            parsedPath = parsedPath.replace("/file/", "/");
+        if (decodedString.startsWith("/file/")) {
+            parsedPath = parsedPath.replaceFirst("/file/", "/");
         }
 
         parsedPath = "file://" + parsedPath;

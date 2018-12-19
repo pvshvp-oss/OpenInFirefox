@@ -90,7 +90,9 @@ public class MainActivity extends AppCompatActivity {
                 builder = new AlertDialog.Builder(getApplicationContext());
             }
             builder.setTitle("Open In Firefox: Error")
-                    .setMessage(e.getMessage())
+                    .setMessage("We're sorry!  Opening an HTML from this app is not supported yet. " +
+                            "Help us to add support for your use case by sending us this feedback message. " +
+                            "Thank you!\n\n" + e.getMessage())
                     .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             MainActivity.this.finish();
@@ -112,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                                     + "\n\n"
                     );
                     if (intent.resolveActivity(getPackageManager()) != null) {
-                        Toast.makeText(MainActivity.this, "Once the email client opens, click on send.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Once the email client opens, please click on send.", Toast.LENGTH_LONG).show();
                         startActivity(emailIntent);
                         MainActivity.this.finish();
                     } else {

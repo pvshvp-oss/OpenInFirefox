@@ -16,7 +16,7 @@
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
-        android:text='This screen does nothing. Please click on your link and select "Open in Firefox". Contact shivanand.pattanshetti@gmail.com for support.'
+        android:text='"OPEN IN FIREFOX" is active. You can now click on any HTML file in a file manager or in an app and select "Open in Firefox". Contact shivanand.pattanshetti@gmail.com for questions.'
         android:textAppearance="@style/TextAppearance.AppCompat.Button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
 import android.util.Log;
 import android.app.*;
 import android.content.DialogInterface;
 import android.os.*;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,12 +39,14 @@ public class MainActivity extends AppCompatActivity {
         Context context = getApplicationContext();
         String action = intent.getAction();
         String type = intent.getType();
+        /*
         try {
             Log.d("CUSTOM:Intent", intent.toString());
             Log.d("CUSTOM:Action", action.toString());
             Log.d("CUSTOM:Type", type.toString());
         } catch (Exception e) {
         }
+        */
         if (Intent.ACTION_VIEW.equals(action) && type != null) {
             if ("text/html".equals(type)) {
                 openInFirefox(context, intent);
@@ -50,7 +54,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void openInFirefox(final Context context, Intent intent) {
+    void openInFirefox(final Context context, final Intent intent) {
+        Intent firefoxIntent;
+        PathDecoder pathDecoder;
+        String fullUsablePath;
         try {
             // https://stackoverflow.com/questions/38200282/android-os-fileuriexposedexception-file-storage-emulated-0-test-txt-exposed
             if (Build.VERSION.SDK_INT >= 24) {
@@ -62,12 +69,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Intent firefoxIntent = new Intent(intent.getAction());
-            PathDecoder pathDecoder = new PathDecoder();
-            Log.d("CUSTOM:PathforURI", intent.getData().getPath());
-            String fullUsablePath = pathDecoder.getPathFromURI(intent.getData());
+            firefoxIntent = new Intent(intent.getAction());
+            pathDecoder = new PathDecoder();
+            // Log.d("CUSTOM:PathforURI", intent.getData().getPath());
+            fullUsablePath = pathDecoder.getPathFromURI(intent.getData());
             firefoxIntent.setDataAndType(Uri.parse(fullUsablePath), intent.getType());
-            Log.d("CUSTOM:ParsedPath", fullUsablePath);
+            // Log.d("CUSTOM:ParsedPath", fullUsablePath);
             if (!new File(fullUsablePath.replaceFirst("file:///", "/")).exists()) {
                 throw new FileNotFoundException("The file \"" + fullUsablePath + "\" does not exist.");
             }
@@ -75,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             firefoxIntent.setPackage("org.mozilla.firefox");
             startActivity(firefoxIntent);
             this.finish();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             AlertDialog.Builder builder;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 builder = new AlertDialog.Builder(MainActivity.this, android.R.style.Theme_Material_Dialog_Alert);
@@ -84,11 +91,47 @@ public class MainActivity extends AppCompatActivity {
             }
             builder.setTitle("Open In Firefox: Error")
                     .setMessage(e.getMessage())
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             MainActivity.this.finish();
                         }
-                    }).setIcon(android.R.drawable.ic_dialog_alert).show();
+                    }).setPositiveButton("Send to Support", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                    String fullUsablePath = new PathDecoder().getPathFromURI(intent.getData());
+                    // emailIntent.setDataAndType(Uri.parse("mailto:"), "message/rfc822");
+                    emailIntent.setData(Uri.parse("mailto:"));
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"shivanand.pattanshetti@gmail.com"});
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "[SUPPORT] Open In Firefox");
+                    emailIntent.putExtra(Intent.EXTRA_TEXT,
+                            "Howdy Developer," + "\n"
+                                    + "\n" + "Error Message: " + e.getMessage()
+                                    + "\n" + "Received Path: " + intent.getData().getPath()
+                                    + "\n" + "Parsed Path: " + fullUsablePath
+                                    + "\n" + "File exists: " + new File(fullUsablePath.replaceFirst("file:///", "/")).exists()
+                                    + "\n\n"
+                    );
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        Toast.makeText(MainActivity.this, "Once the email client opens, click on send.", Toast.LENGTH_LONG).show();
+                        startActivity(emailIntent);
+                        MainActivity.this.finish();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Could not send the email. There are no email clients installed.", Toast.LENGTH_LONG).show();
+                        MainActivity.this.finish();
+                    }
+                            /*
+                            try {
+                                startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+                            } catch (android.content.ActivityNotFoundException ex) {
+                                Toast.makeText(MainActivity.this, "Could not send the email. There are no email clients installed.", Toast.LENGTH_LONG).show();
+                                MainActivity.this.finish();
+                            } catch(Exception e){
+                                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                                MainActivity.this.finish();
+                            }
+                            */
+                }
+            }).setIcon(android.R.drawable.ic_dialog_alert).show();
         }
     }
 }

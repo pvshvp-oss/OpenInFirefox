@@ -10,6 +10,8 @@ import android.app.*;
 import android.content.DialogInterface;
 import android.os.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 
 import static android.widget.Toast.LENGTH_LONG;
@@ -63,8 +65,12 @@ public class MainActivity extends AppCompatActivity {
             Intent firefoxIntent = new Intent(intent.getAction());
             PathDecoder pathDecoder = new PathDecoder();
             Log.d("CUSTOM:PathforURI", intent.getData().getPath());
-            firefoxIntent.setDataAndType(Uri.parse(pathDecoder.getPathFromURI(intent.getData())), intent.getType());
-            Log.d("CUSTOM:ParsedPath", pathDecoder.getPathFromURI(intent.getData()));
+            String fullUsablePath = pathDecoder.getPathFromURI(intent.getData());
+            firefoxIntent.setDataAndType(Uri.parse(fullUsablePath), intent.getType());
+            Log.d("CUSTOM:ParsedPath", fullUsablePath);
+            if (!new File(fullUsablePath.replaceFirst("file:///", "/")).exists()) {
+                throw new FileNotFoundException("The file \"" + fullUsablePath + "\" does not exist.");
+            }
             // startActivity(Intent.createChooser(firefoxIntent, "Open file using:"));
             firefoxIntent.setPackage("org.mozilla.firefox");
             startActivity(firefoxIntent);
@@ -76,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 builder = new AlertDialog.Builder(getApplicationContext());
             }
-            builder.setTitle("Error")
+            builder.setTitle("Open In Firefox: Error")
                     .setMessage(e.getMessage())
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {

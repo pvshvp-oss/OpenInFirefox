@@ -125,10 +125,14 @@ public class PathDecoder {
     public String getPathFromDecodedString(String decodedString) {
         String parsedPath = decodedString;
 
-        if(decodedString.contains("/root-path/")){
-            parsedPath = decodedString.replace("/root-path/", "/");
-        } else if(decodedString.contains("/external_files/")){
-            parsedPath = decodedString.replace("/external_files/", Environment.getExternalStorageDirectory().getPath() + "/");
+        if (decodedString.startsWith("/root-path/")) {
+            parsedPath = decodedString.replaceFirst("/root-path/", "/");
+        } else if (decodedString.startsWith("/external_files/")) {
+            parsedPath = decodedString.replaceFirst("/external_files/", Environment.getExternalStorageDirectory().getPath() + "/");
+        } else if (decodedString.startsWith("/ext/")) {
+            parsedPath = decodedString.replaceFirst("/ext/", Environment.getExternalStorageDirectory().getPath() + "/");
+        } else if (decodedString.startsWith("/document/raw:/")) {
+            parsedPath = decodedString.replaceFirst("/document/raw:/", "/");
         }
 
         if(decodedString.indexOf("/file/") == 0) {

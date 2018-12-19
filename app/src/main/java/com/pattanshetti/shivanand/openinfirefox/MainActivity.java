@@ -3,13 +3,16 @@ package com.pattanshetti.shivanand.openinfirefox;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.app.*;
+import android.content.DialogInterface;
+import android.os.*;
 
 import java.lang.reflect.Method;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Open In Firefox");
 
         // Get intent, action and MIME type
         Intent intent = getIntent();
@@ -44,31 +48,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void openInFirefox(Context context, Intent intent) {
-        if (Build.VERSION.SDK_INT >= 24) {
-            try {
-                Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
-                m.invoke(null);
-            } catch (Exception e) {
-                e.printStackTrace();
+    void openInFirefox(final Context context, Intent intent) {
+        try {
+            if (Build.VERSION.SDK_INT >= 24) {
+                try {
+                    Method m = StrictMode.class.getMethod("disableDeathOnFileUriExposure");
+                    m.invoke(null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+
+            Intent firefoxIntent = new Intent(intent.getAction());
+            PathDecoder pathDecoder = new PathDecoder();
+            Log.d("CUSTOM:PathforURI", intent.getData().getPath());
+            firefoxIntent.setDataAndType(Uri.parse(pathDecoder.getPathFromURI(intent.getData())), intent.getType());
+            Log.d("CUSTOM:ParsedPath", pathDecoder.getPathFromURI(intent.getData()));
+            // startActivity(Intent.createChooser(firefoxIntent, "Open file using:"));
+            firefoxIntent.setPackage("org.mozilla.firefox");
+            startActivity(firefoxIntent);
+            this.finish();
+        } catch (Exception e) {
+            AlertDialog.Builder builder;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                builder = new AlertDialog.Builder(MainActivity.this, android.R.style.Theme_Material_Dialog_Alert);
+            } else {
+                builder = new AlertDialog.Builder(getApplicationContext());
+            }
+            builder.setTitle("Error")
+                    .setMessage(e.getMessage())
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            MainActivity.this.finish();
+                        }
+                    }).setIcon(android.R.drawable.ic_dialog_alert).show();
         }
-
-//        Log.d("CUSTOM:PathforURI", intent.getData().getPath());
-//        String URI = intent.getData().getPath();
-//        URI = URI.substring(ordinalIndexOf(URI, "/", 2) + 1);
-//        URI = "file://"/*+Environment.getExternalStorageDirectory().getPath()*/ + "/" + URI;
-//        Log.d("CUSTOM:URI", URI);
-
-        Intent firefoxIntent = new Intent(intent.getAction());
-        // firefoxIntent.setDataAndType(Uri.parse(URI), intent.getType());
-        PathDecoder pathDecoder = new PathDecoder();
-        Log.d("CUSTOM:PathforURI", intent.getData().getPath());
-        firefoxIntent.setDataAndType(Uri.parse(pathDecoder.getPathFromURI(intent.getData())), intent.getType());
-        Log.d("CUSTOM:ParsedPath", pathDecoder.getPathFromURI(intent.getData()));
-        // startActivity(Intent.createChooser(firefoxIntent, "Open file using:"));
-        firefoxIntent.setPackage("org.mozilla.firefox");
-        startActivity(firefoxIntent);
-        this.finish();
     }
 }
